@@ -1,6 +1,6 @@
 addpath(genpath('..\MATLAB Functions'))
 
-dname = '.\Data\E16\';
+dname = '.\Data\P0-2\Base\';
 [fn dname] = uigetfile([dname '\*.tif']);
 
 img = loadTif([dname fn],8);
@@ -36,8 +36,8 @@ end
 figure; findpeaks(meanPlot,'MinPeakProminence',stdMP)
 [pks, locs] = findpeaks(meanPlot,'MinPeakProminence',stdMP);
 %% for removing non-drug components (ryanodine)
-%timesToExclude = [600 900; 1500 2400];
-timesToExclude = [301 480; 781 2100]; %E16 videos (with electrical recordings)
+timesToExclude = [600 900; 1500 2400];
+%timesToExclude = [301 480; 781 2100]; %E16 videos (with electrical recordings)
 for i = 1:size(timesToExclude,1)
     pks(locs > timesToExclude(i,1) & locs < timesToExclude(i,2)) = [];
     locs(locs > timesToExclude(i,1) & locs < timesToExclude(i,2)) = [];

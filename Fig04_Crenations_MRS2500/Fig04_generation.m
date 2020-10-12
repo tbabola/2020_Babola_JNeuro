@@ -8,7 +8,7 @@ dataBlock = table(repmat(1,size(freqs,1),1),freqs,area,aream);
 conditionTimes = [0 600; 900 1500; 2400 3000];
 crens = loadCellStructs('.\Data\P0-2\*.mat');
 [freqs,area,aream] = getStats(crens,conditionTimes);
-dataBlock = [dataBlock; table(repmat(2,size(freqs,1),1),freqs,area,aream)];
+dataBlock = [dataBlock; table(repmat(1.7,size(freqs,1),1),freqs,area,aream)];
 
 crens7_8 = loadCellStructs('.\Data\P7-8\*.mat');
 [freqs,area,aream] = getStats(crens7_8,conditionTimes);
@@ -18,11 +18,21 @@ crens10_12 = loadCellStructs('.\Data\P10-12\*.mat');
 [freqs,area,aream] = getStats(crens10_12,conditionTimes);
 dataBlock = [dataBlock; table(repmat(4,size(freqs,1),1),freqs,area,aream)];
 dataStats = grpstats(dataBlock,'Var1',{'mean','sem'});
+
+crens_0_base = loadCellStructs('.\Data\P0-2\base\*.mat');
+[freqs,area,aream] = getStats(crens_0_base,conditionTimes);
+%prep 4 washout did not happen because of air bubble and bath overflow
+freqs(4,3) = NaN;
+area(4,3) = NaN;
+aream(4,3) = NaN;
+dataBlock = [dataBlock; table(repmat(2.3,size(freqs,1),1),freqs,area,aream)];
+dataStats = grpstats(dataBlock,'Var1',{'mean','sem'});
+
 %%
 meanMarkSize = 12;
 color1 = 'k';
 figure;
-offset = 0.3;
+offset = 0.2;
 points = [-offset 0 offset];
 xs = repmat(dataBlock.Var1,1,3);
 xs = xs+points;
@@ -31,9 +41,9 @@ plot(xs',ys','-','Color',[0.7 0.7 0.7]);
 ylim([0 5]);
 yticks(0:2.5:5);
 hold on;
-errorbar([1 2 3 4] - offset, dataStats.mean_freqs(:,1), dataStats.sem_freqs(:,1),'LineStyle', 'none','LineWidth',1,'Color',color1,'CapSize',0,'Marker','.','MarkerSize',meanMarkSize);
-errorbar([1 2 3 4], dataStats.mean_freqs(:,2), dataStats.sem_freqs(:,2),'LineStyle', 'none','LineWidth',1,'Color','r','CapSize',0,'Marker','.','MarkerSize',meanMarkSize);
-errorbar([1 2 3 4] + offset, dataStats.mean_freqs(:,3), dataStats.sem_freqs(:,3),'LineStyle', 'none','LineWidth',1,'Color',[0.4 0.4 0.4],'CapSize',0,'Marker','.','MarkerSize',meanMarkSize);
+errorbar([1 1.7 2.3 3 4] - offset, dataStats.mean_freqs(:,1), dataStats.sem_freqs(:,1),'LineStyle', 'none','LineWidth',1,'Color',color1,'CapSize',0,'Marker','.','MarkerSize',meanMarkSize);
+errorbar([1 1.7 2.3 3 4], dataStats.mean_freqs(:,2), dataStats.sem_freqs(:,2),'LineStyle', 'none','LineWidth',1,'Color','r','CapSize',0,'Marker','.','MarkerSize',meanMarkSize);
+errorbar([1 1.7 2.3 3 4] + offset, dataStats.mean_freqs(:,3), dataStats.sem_freqs(:,3),'LineStyle', 'none','LineWidth',1,'Color',[0.4 0.4 0.4],'CapSize',0,'Marker','.','MarkerSize',meanMarkSize);
 ylabel("Crenations per minute");
 xticks(1:4);
 xticklabels({'E16-17','P0-2','P6-8','P10-12'});
@@ -62,8 +72,12 @@ export_fig('.\EPS Panels\crenation_Frequency.eps');
 [p,avova00,stats] = anova1(dataBlock.freqs(dataBlock.Var1==1,:));
 c00 = multcompare(stats)
 
-[p,anova0,stats] = anova1(dataBlock.freqs(dataBlock.Var1==2,:));
+[p,anova0,stats] = anova1(dataBlock.freqs(dataBlock.Var1==1.7,:));
 c0 =multcompare(stats)
+
+[p,anova0,stats] = anova1(dataBlock.freqs(dataBlock.Var1==2.3,:));
+c =multcompare(stats)
+
 
 %P7
 [p,anova111,stats] = anova1(dataBlock.freqs(dataBlock.Var1==3,:));
@@ -96,7 +110,7 @@ figQuality(gcf,gca,[3 0.5]);
 export_fig('.\EPS Panels\E16_MRS_crenations_timeline.eps');
 
 %%
-%P0
+%P0 Apex
 num = 5;
 fileList = loadFileList('.\Data\P0-2\*.tif');
 dataFileList = loadFileList('.\Data\P0-2\*.mat');
@@ -118,6 +132,29 @@ print('.\EPS Panels\P1_MRS_crenations.pdf','-dpdf');
 figure(h3);
 figQuality(gcf,gca,[3 0.5]);
 export_fig('.\EPS Panels\P1_MRS_crenations_timeline.eps');
+%%
+%P0 Base
+num = 1;
+fileList = loadFileList('.\Data\P0-2\base\*.tif');
+dataFileList = loadFileList('.\Data\P0-2\base\*.mat');
+
+img = loadFirstTif(fileList{num},8);
+data = load(dataFileList{num});
+crens = data.Crens;
+[h,h1] = drawCrenations(crens.crenationImg(:,:,crens.locs < 300),crens.locs(crens.locs < 300),300,uint8(img));
+figure(h);
+print('.\EPS Panels\P1_base_baseline_crenations.pdf','-dpdf');
+figure(h1);
+figQuality(gcf,gca,[3 0.5]);
+export_fig('.\EPS Panels\P1_base_baseline_crenations_timeline.eps');
+
+
+[h2,h3] = drawCrenations(crens.crenationImg(:,:,crens.locs > 600 & crens.locs <900),crens.locs(crens.locs > 600 & crens.locs <900)-600,300,uint8(img));
+figure(h2);
+print('.\EPS Panels\P1_base_MRS_crenations.pdf','-dpdf');
+figure(h3);
+figQuality(gcf,gca,[3 0.5]);
+export_fig('.\EPS Panels\P1_base_MRS_crenations_timeline.eps');
 %%
 %P7
 num = 2;
