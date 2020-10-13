@@ -1,8 +1,4 @@
-defaultDir = 'M:\Projects and Analysis\Papers\Development'; %change if in a different location
-cd(defaultDir);
-addpath(genpath('MATLAB Functions'));
-cd(['MRS2500 over development ISCs']);
-
+addpath(genpath('..\MATLAB Functions'));
 %%
 %This script analyzes data recorded from ISCs under baseline conditions
 %(first 300 s of recording) at all ages
@@ -15,7 +11,7 @@ conditions = {'Baseline'}; %{'Baseline','MRS','Washout'};
 conditionTimes = [0 300]; %[0 300; 540 840; 1800 2100];
 
 %%dir 
-dname = '.\Data\WT\*\*\*';
+dname = '.\Data\WT\P0\*\*';
 folderlist = dir(dname);
 folderlist = folderlist(~contains({folderlist.name},'.'))
 analyze = [1 1 1 1 1];

@@ -1,9 +1,6 @@
 %% Figure 3: MRS2500
-defaultDir = 'D:\Projects and Analysis\Papers\Development'; %change if in a different location
-%defaultDir = 'C:\Users\Travis\Desktop\Development Paper'
-cd(defaultDir);
-addpath(genpath('MATLAB Functions'));
-cd(['Fig01_03_ISCdevelopment_ephys']);
+addpath(genpath('..\MATLAB Functions'));
+
 
 %% Panel A: Example traces
 fileList = loadFileList('.\Data\WT_MRS\E16_17\*\*gfv.abf');
@@ -42,12 +39,13 @@ export_fig('.\EPS Panels\A_exampleTraces.eps')
 %% Panel B Frequency, amplitude, and integral plots
 % = loadFileList(['.\Data\WT_MRS\P1_2\*\*_gfv_stats.mat']);
 cellS16_5 = loadCellStructs('.\Data\WT_MRS\E16_17\*\*_gfv_stats.mat');
-cellS1_2 = loadCellStructs('.\Data\WT_MRS\P1_2\*\*_gfv_stats.mat');
+cellS1_2 = loadCellStructs('.\Data\WT_MRS\P1_2\apex\*\*_gfv_stats.mat');
+cells_1_base = loadCellStructs('.\Data\WT_MRS\P1_2\apex\*\*_gfv_stats.mat');
 cellS7_8 = loadCellStructs('.\Data\WT_MRS\P7_8\*\*_gfv_stats.mat');
 cellS11_12 = loadCellStructs('.\Data\WT_MRS\P11_12\*\*_gfv_stats.mat')
 
 [pkstatBlock16_5, ampstatBlock16_5,intstatBlock16_5, rinstatblock16_5] = getstatBlock(cellS16_5);
-[pkstatBlock1_2, ampstatBlock1_2,intstatBlock1_2, rinstatblock1_2] = getstatBlock(cellS1_2);
+[pkstatBlock1_2, ampstatBlock1_2,intstatBlock1_2, rinstatblock1_2] = getstatBlock([cellS1_2 cells_1_base]);
 [pkstatBlock7_8, ampstatBlock7_8,intstatBlock7_8,rinstatblock7_8] = getstatBlock(cellS7_8);
 [pkstatBlock11_12, ampstatBlock11_12,intstatBlock11_12, rinstatblock11_12] = getstatBlock(cellS11_12);
 
@@ -56,19 +54,25 @@ ampstatBlock(6:7,3) = NaN;
 intstatBlock(6:7,3) = NaN;
 
 h1 = compareDev(pkstatBlock16_5,pkstatBlock1_2,pkstatBlock7_8, pkstatBlock11_12,{'E15-16','P0-2','P6-8','P10-12'}, 'Events per minute',[1.5 0.9],[12 10]);
-figure(h1); 
+figure(h1);
+hold on;
+  plot([1.8 1.8; 2.2 2.2],pkstatBlock1_2(end-1:end,1:2)','-','Color','r');
 ylim([0 50]);
 yticks(0:25:50);
 %export_fig('.\EPS Panels\B_Frequency.eps');
 
 h2 = compareDev(ampstatBlock16_5,ampstatBlock1_2,ampstatBlock7_8, ampstatBlock11_12,{'E15-16','P0-2','P6-8','P10-12'}, 'Amplitude (-pA)',[1.5 0.9],[12 10]);
 figure(h2); 
+hold on;
+  plot([1.8 1.8; 2.2 2.2],ampstatBlock1_2(end-1:end,1:2)','-','Color','r');
 ylim([0 1500]);
 yticks(0:500:1500);
 %export_fig('.\EPS Panels\C_Amplitude.eps');
 
 h3 = compareDev(intstatBlock16_5,intstatBlock1_2,intstatBlock7_8, intstatBlock11_12,{'E15-16','P0-2','P6-8','P10-12'}, 'Integral (-pC)',[1.5 0.9],[12 10]);
 figure(h3); 
+hold on;
+  plot([1.8 1.8; 2.2 2.2],intstatBlock1_2(end-1:end,1:2)','-','Color','r');
 ylim([0 1000]);
 yticks(0:500:1000);
 %export_fig('.\EPS Panels\C_Amplitude.eps');

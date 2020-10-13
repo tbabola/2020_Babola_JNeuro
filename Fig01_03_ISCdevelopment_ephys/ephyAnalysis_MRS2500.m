@@ -13,10 +13,10 @@ pulse = -100; %test pulse in pA for resistance measurement
 pulseTime = [0 0.01 0.2 0.26]; %periods to measure resistance [baseline_start baseline_end ss_start ss_end]
 peakProminenceThr = 25; %threshold in pA
 conditions = {'Baseline','MRS','Washout'};
-conditionTimes = [0 300; 540 840; 1800 2100];
+conditionTimes = [0 300; 540 840; 1800 2100] + 10*60;
 
 %%dir 
-dname = '.\Data\WT_MRS\P1_2';
+dname = '.\Data\WT_MRS\P1_2\Base';
 folderlist = dir(dname);
 folderlist = folderlist(3:end);
 analyze = [1 1 1 1 1];
@@ -25,6 +25,12 @@ if exist('cell') | exist('cellS')
    clear 'cell' 'cellS'; 
 end
 
+%%
+%for CJK data
+folderlist_o = folderlist;
+%folderlist = folderlist(1);
+folderlist = folderlist_o(2); %%added 10 minutes to baseline
+%%
 for i = 1:size(folderlist,1)
     if analyze(1)
         fileList = loadFileList([dname '\' folderlist(i).name '\*_rin.abf']);

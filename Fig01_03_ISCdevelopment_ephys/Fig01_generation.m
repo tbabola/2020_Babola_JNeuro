@@ -1,9 +1,5 @@
 %% Figure 1: ISC Spontaneous Currents
-defaultDir = 'D:\Projects and Analysis\Papers\Development'; %change if in a different location
-%defaultDir = 'C:\Users\Travis\Desktop\Development Paper';
-cd(defaultDir);
-addpath(genpath('MATLAB Functions'));
-cd(['Fig01_03_ISCdevelopment_ephys']);
+addpath(genpath('..\MATLAB Functions'));
 
 %% Panel B
 apexFiles = loadFileList('./Data/WT/E16/Apex/*/*_gfv.abf');
@@ -27,10 +23,11 @@ handleTheSubplot(E16handles,[3 1]);
 figQuality(gcf,gca,[4,3]);
 export_fig('./EPS Panels/E16_Base_Apex_Recordings.eps');
 %% Panel C
-P0Files = loadFileList('./Data/WT_MRS/P1_2/*/*_gfv.abf');
+P0Files = loadFileList('./Data/WT_MRS/P1_2/Apex/*/*_gfv.abf');
+P0base = loadFileList('./Data/WT_MRS/P1_2/Base/*/*_gfv.abf');
 P7Files = loadFileList('./Data/WT_MRS/P7_8/*/*_gfv.abf');
 P11Files = loadFileList('./Data/WT_MRS/P11_12/*/*_gfv.abf');
-files = {P0Files{3}; P7Files{1}; P11Files{3}};
+files = {P0Files{3}; P0base{1}; P7Files{1}; P11Files{3}};
 
 handles = {};
 for i = 1:size(files,1)
@@ -41,9 +38,10 @@ for i = 1:size(files,1)
     plot(time,-dsm,'Color','k'); hold on;
     ylim([-2500 250]);
     xlim([0 300]);
+    box off;
 end
 
-handleTheSubplot(handles,[3 1]);
+handleTheSubplot(handles,[4 1]);
 figQuality(gcf,gca,[4,3]);
 export_fig('./EPS Panels/Older_Apex_Recordings.eps');
 %% Panel D, integral
@@ -89,7 +87,7 @@ ampApexStats = grpstats(apex.Amp,'Group',{'mean','sem'});
 errorbar(ampApexStats.Group, ampApexStats.mean_Amp, ampApexStats.sem_Amp,'LineStyle', 'none','LineWidth',1,'Color',d_green,'CapSize',0,'Marker','.','MarkerSize',12);
 
 ampBaseStats = grpstats(base.Amp,'Group',{'mean','sem'});
-errorbar(1.2, ampBaseStats.mean_Amp(1), ampBaseStats.sem_Amp(1),'LineStyle', 'none','LineWidth',1,'Color',d_mag,'CapSize',0,'Marker','.','MarkerSize',12);
+errorbar(ampBaseStats.Group, ampBaseStats.mean_Amp, ampBaseStats.sem_Amp,'LineStyle', 'none','LineWidth',1,'Color',d_mag,'CapSize',0,'Marker','.','MarkerSize',12);
 
 xticks(1:4);
 xlim([0 4.5]);
@@ -103,7 +101,7 @@ scatter(base.Rin.Group,base.Rin.Rin,5,l_mag,'filled','jitter','on','jitterAmount
 ampStats = grpstats(apex.Rin,'Group',{'mean','sem'}); hold on;
 errorbar(ampStats.Group, ampStats.mean_Rin, ampStats.sem_Rin,'LineStyle', 'none','LineWidth',1,'Color',d_green,'CapSize',0,'Marker','.','MarkerSize',12);
 ampBaseStats = grpstats(base.Rin,'Group',{'mean','sem'});
-errorbar(1.2, ampBaseStats.mean_Rin(1), ampBaseStats.sem_Rin(1),'LineStyle', 'none','LineWidth',1,'Color',d_mag,'CapSize',0,'Marker','.','MarkerSize',12);
+errorbar(ampBaseStats.Group, ampBaseStats.mean_Rin, ampBaseStats.sem_Rin,'LineStyle', 'none','LineWidth',1,'Color',d_mag,'CapSize',0,'Marker','.','MarkerSize',12);
 
 xticks(1:4);
 xlim([0 4.5]);
@@ -135,14 +133,40 @@ c2 = multcompare(stats);
 
 [p,~,stats] = anova1(apex.Rin.Rin,tempGroup);
 c3 = multcompare(stats);
+%%
+%%multcompare everyone
+tempGroup = [apex.Freq.Group; base.Freq.Group]
+[p,~,stats] = anova1([apex.Freq.Freq; base.Freq.Freq],tempGroup);
+c = multcompare(stats);
+
+[p,~,stats] = anova1([apex.Amp.Amp; base.Amp.Amp],tempGroup);
+c1 = multcompare(stats);
+
+[p,~,stats] = anova1([apex.Int.Int; base.Int.Int],tempGroup);
+c2 = multcompare(stats);
+
+[p,~,stats] = anova1([apex.Rin.Rin; base.Rin.Rin],tempGroup);
+c3 = multcompare(stats);
+
 
 %% Print stats
+display("apex");
+tempGroup = apex.Freq.Group;
 display("Frequencies")
 [statarray, sem] = grpstats(apex.Freq.Freq,tempGroup,{'mean','sem'})
 display("Amplitudes")
 [statarray, sem] = grpstats(apex.Amp.Amp,tempGroup,{'mean','sem'})
 display("Integrals")
 [statarray, sem] = grpstats(apex.Int.Int,tempGroup,{'mean','sem'})
+
+display("Base");
+tempGroup = base.Freq.Group;
+display("Frequencies")
+[statarray, sem] = grpstats(base.Freq.Freq,tempGroup,{'mean','sem'})
+display("Amplitudes")
+[statarray, sem] = grpstats(base.Amp.Amp,tempGroup,{'mean','sem'})
+display("Integrals")
+[statarray, sem] = grpstats(base.Int.Int,tempGroup,{'mean','sem'})
 %%
 
 function [apex,base,all] = getAgesLocation()
@@ -152,27 +176,27 @@ function [apex,base,all] = getAgesLocation()
     cells_E16 = loadCellStructs('.\Data\WT\E16\Apex\*\*_gfv_stats.mat');
     %cells_E16 = [cells_E16 loadCellStructs('.\Data\WT_MRS\E16_17\200123*\*_gfv_stats.mat')];
     %cells_E17 = loadCellStructs('.\Data\WT_MRS\E16_17\200116*\*_gfv_stats.mat');
-    cells_P1 = loadCellStructs('.\Data\WT_MRS\P1_2\*\*_gfv_stats.mat');
+    cells_P1 = loadCellStructs('.\Data\WT_MRS\P1_2\Apex\*\*_gfv_stats.mat');
     cells_P7 = loadCellStructs('.\Data\WT_MRS\P7_8\*\*_gfv_stats.mat');
     cells_P11 = loadCellStructs('.\Data\WT_MRS\P11_12\*\*_gfv_stats.mat');
 
     bigInt = [getIntegralBlock(cells_E14,0.8); getIntegralBlock(cells_E16,0.8); ...
-                getIntegralBlock(cells_P1,2); getIntegralBlock(cells_P7,3); ...
+                getIntegralBlock(cells_P1,1.8); getIntegralBlock(cells_P7,3); ...
                 getIntegralBlock(cells_P11,4)];
     apexInt = table(bigInt(:,1),bigInt(:,2),'VariableNames',{'Group','Int'});
 
     bigFreq = [getFreqBlock(cells_E14,0.8); getFreqBlock(cells_E16,0.8); ...
-                getFreqBlock(cells_P1,2); getFreqBlock(cells_P7,3); ...
+                getFreqBlock(cells_P1,1.8); getFreqBlock(cells_P7,3); ...
                 getFreqBlock(cells_P11,4)];
     apexFreq = table(bigFreq(:,1),bigFreq(:,2),'VariableNames',{'Group','Freq'});
 
     bigAmp = [getAmpBlock(cells_E14,0.8); getAmpBlock(cells_E16,0.8); ...
-                getAmpBlock(cells_P1,2); getAmpBlock(cells_P7,3); ...
+                getAmpBlock(cells_P1,1.8); getAmpBlock(cells_P7,3); ...
                 getAmpBlock(cells_P11,4)];
     apexAmp = table(bigAmp(:,1), bigAmp(:,2), 'VariableNames',{'Group','Amp'});
     
     bigRin = [getRinBlock(cells_E14,0.8); getRinBlock(cells_E16,0.8); ...
-                getRinBlock(cells_P1,2); getRinBlock(cells_P7,3); ...
+                getRinBlock(cells_P1,1.8); getRinBlock(cells_P7,3); ...
                 getRinBlock(cells_P11,4)];
     apexRin = table(bigRin(:,1), bigRin(:,2), 'VariableNames',{'Group','Rin'});
     
@@ -186,16 +210,19 @@ function [apex,base,all] = getAgesLocation()
     %base
     cells_E14 = loadCellStructs('.\Data\WT\E14\Base\*\*_gfv_stats.mat');
     cells_E16 = loadCellStructs('.\Data\WT\E16\Base\*\*_gfv_stats.mat');
-    bigInt = [getIntegralBlock(cells_E14,1.2);  getIntegralBlock(cells_E16,1.2)];
+    cells_b_P1 = loadCellStructs('.\Data\WT_MRS\P1_2\Base\*\*_gfv_stats.mat');
+    cells_b_P1 = [cells_b_P1 loadCellStructs('.\Data\WT\P0\Base\*\*_gfv_stats.mat')]
+    
+    bigInt = [getIntegralBlock(cells_E14,1.2);  getIntegralBlock(cells_E16,1.2); getIntegralBlock(cells_b_P1,2.2)];
     baseInt = table(bigInt(:,1),bigInt(:,2),'VariableNames',{'Group','Int'});
 
-    bigFreq = [getFreqBlock(cells_E14,1.2); getFreqBlock(cells_E16,1.2)];
+    bigFreq = [getFreqBlock(cells_E14,1.2); getFreqBlock(cells_E16,1.2); getFreqBlock(cells_b_P1,2.2)];
     baseFreq = table(bigFreq(:,1),bigFreq(:,2),'VariableNames',{'Group','Freq'});
 
-    bigAmp = [getAmpBlock(cells_E14,1.2); getAmpBlock(cells_E16,1.2)];
+    bigAmp = [getAmpBlock(cells_E14,1.2); getAmpBlock(cells_E16,1.2); getAmpBlock(cells_b_P1,2.2)];
     baseAmp = table(bigAmp(:,1), bigAmp(:,2), 'VariableNames',{'Group','Amp'});
     
-    bigRin = [getRinBlock(cells_E14,1.2); getRinBlock(cells_E16,1.2)];
+    bigRin = [getRinBlock(cells_E14,1.2); getRinBlock(cells_E16,1.2); getRinBlock(cells_b_P1,2.2)];
     baseRin = table(bigRin(:,1), bigRin(:,2), 'VariableNames',{'Group','Rin'});
     
     base = struct();

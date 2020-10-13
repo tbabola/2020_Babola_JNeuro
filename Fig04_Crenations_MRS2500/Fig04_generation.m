@@ -85,6 +85,11 @@ c1 =multcompare(stats);
 [p,anova222,stats] = anova1(dataBlock.freqs(dataBlock.Var1==4,:));
 c2 = multcompare(stats)
 
+%%
+[mean, sem] = grpstats(dataBlock.freqs(dataBlock.Var1==2.3,1),ones(6,1),{'mean','sem'})
+[mean, sem] = grpstats(dataBlock.freqs(dataBlock.Var1==3,1),ones(size(dataBlock.freqs(dataBlock.Var1==3,1),1),1),{'mean','sem'})
+[mean, sem] = grpstats(dataBlock.freqs(dataBlock.Var1==4,1),ones(size(dataBlock.freqs(dataBlock.Var1==4,1),1),1),{'mean','sem'})
+
 %% draw Ca2+ events
 %E16
 num = 1;
